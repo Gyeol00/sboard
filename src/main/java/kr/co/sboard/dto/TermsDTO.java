@@ -5,11 +5,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
 
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
-@ToString
+@AllArgsConstructor
 @Builder
 public class TermsDTO {
 

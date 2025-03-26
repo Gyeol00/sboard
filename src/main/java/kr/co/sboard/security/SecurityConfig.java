@@ -33,6 +33,7 @@ public class SecurityConfig {
             인가 설정
              - MyUserDetails 권한 목록 생성하는 메서드(getAuthorities)에서 접두어로 ROLE_ 입력해야 hasRole, hasAnyRole 권한 처리됨
              - Spring Security는 기본적으로 인가 페이지에 대해 login 페이지로 redirect 수행, login 후 요청했던 페이지로 이동
+        */
 
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/").permitAll()
@@ -40,8 +41,10 @@ public class SecurityConfig {
                 .requestMatchers("/admin/**").hasRole("ADMIN") // admin으로 시작하는 모든 페이지에서 ADMIN 사용자만 가능하게
                 .requestMatchers("/manager/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers("/staff/**").hasAnyRole("ADMIN", "MANAGER", "STAFF")
+                .requestMatchers("/article/**").authenticated()
+                .requestMatchers("/user/**").permitAll()
                 .anyRequest().permitAll());
-                */
+
         // 403 Forbidden 에러 (관리자 에러)
 
         // 기타 보안 설정

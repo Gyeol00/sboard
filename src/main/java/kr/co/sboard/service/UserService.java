@@ -3,6 +3,7 @@ package kr.co.sboard.service;
 import jakarta.mail.Message;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import kr.co.sboard.dto.UserDTO;
 import kr.co.sboard.entity.User;
@@ -20,14 +21,14 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class UserService {
+public class UserService { // 싱글톤 객체
 
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
 
-    private final HttpSession session; // 세션 선언
+    private final HttpServletRequest request; // 세션 선언
 
     public void register(UserDTO userDTO) {
 
@@ -57,6 +58,7 @@ public class UserService {
                 String code = sendEmailCode(value);
 
                 // 인증코드 비교를 하기 위해서 세션 저장
+                HttpSession session = request.getSession();
                 session.setAttribute("authCode", code);
 
             }
