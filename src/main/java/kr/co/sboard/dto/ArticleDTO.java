@@ -15,12 +15,19 @@ public class ArticleDTO {
     private String cate;
     private String title;
     private String content;
-    private int conmment;
+    private int comment;
     private int file;
     private int hit;
     private String writer;
     private String regip;
     private String wdate;
+
+    // 추가 필드
+    private String nick;
+
+    public String getWdate() {
+        return wdate.substring(0, 10);
+    }
 
     // 파일 첨부 객체
     private MultipartFile file1;
