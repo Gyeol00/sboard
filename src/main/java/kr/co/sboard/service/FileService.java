@@ -8,13 +8,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -80,9 +91,42 @@ public class FileService {
         return fileDTOList;
     }
 
-    public void downloadFile(){
+    public ResponseEntity downloadFile(int fno){
 
+        Optional<File> optFile = fileRepository.findById(fno);
+
+        File file = null;
+
+        if(optFile.isPresent()){
+            file = optFile.get();
+        }
+
+        // 파일 다운로드 스트림 작업
+        try{
+
+            Path path = Paths.get(uploadDir + java.io.File.separator + file.getSName());
+            String contentType = Files.probeContentType(path); // 파일에 대한 컨텐츠 타입을 구함 (mp4, png, txt 등)
+
+            // HttpHeaders 정보
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDisposition(
+                    ContentDisposition.builder("attachment") // 응답 정보
+                            .filename(file.getOName(), StandardCharsets.UTF_8)
+                            .build());
+
+            headers.add(HttpHeaders.CONTENT_TYPE, contentType);
+            Resource resource = new InputStreamResource(Files.newInputStream(path)); // resource = 실제 파일
+
+            return ResponseEntity
+                    .ok()
+                    .headers(headers)
+                    .body(resource);
+
+        }catch (Exception e){
+            log.error(e.getMessage());
+        }
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .build();
     }
-
-
 }

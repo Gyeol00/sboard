@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,6 +27,40 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final ArticleMapper articleMapper;
     private final ModelMapper modelMapper;
+
+    // 글 목록 검색
+    public PageResponseDTO searchAll(PageRequestDTO pageRequestDTO) {
+
+        // 페이징 처리를 위한 pageable 객체 생성
+        Pageable pageable = pageRequestDTO.getPageable("no"); // 최신글부터 정렬, 내림차순
+
+        Page<Tuple> pageArticle = articleRepository.selectAllForSearch(pageRequestDTO, pageable);
+
+        log.info("pageArticle : {} ", pageArticle);
+
+        // Article Entity 리스트를 ArticleDTO 리스트로 변환
+        List<ArticleDTO> articleDTOList = pageArticle.getContent().stream().map(tuple -> { // 아티클 엔티티를 아티클DTO로 변환
+
+            Article article = tuple.get(0, Article.class); // .select(qArticle, qUser.nick) 1번째 값
+            String nick = tuple.get(1, String.class); // .select(qArticle, qUser.nick) 2번째 값
+
+            ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
+            articleDTO.setNick(nick);
+
+            return articleDTO;
+
+        }).toList();
+
+        // 전체 게시물 갯수
+        int total = (int) pageArticle.getTotalElements();
+
+        return PageResponseDTO
+                .builder()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(articleDTOList)
+                .total(total)
+                .build();
+    }
 
     // 글 목록 조회
     public PageResponseDTO findAll(PageRequestDTO pageRequestDTO) {
@@ -59,6 +94,22 @@ public class ArticleService {
                 .dtoList(articleDTOList)
                 .total(total)
                 .build();
+    }
+
+    // 글 클릭 시 뷰
+    public ArticleDTO findById(int no) {
+
+        Optional<Article> optArticle = articleRepository.findById(no);
+
+        if (optArticle.isPresent()) {
+            Article article = optArticle.get();
+            ArticleDTO articleDTO = modelMapper.map(article, ArticleDTO.class);
+            return articleDTO; // 유저 정보, 파일 정보
+
+        }
+
+        return null;
+
     }
 
     public int register(ArticleDTO articleDTO) {

@@ -12,4 +12,6 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>, Arti
     //@Query("") // JPQL
     //public void selectAll();
 
+
+
 }
