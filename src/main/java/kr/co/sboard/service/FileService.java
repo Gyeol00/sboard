@@ -40,6 +40,30 @@ public class FileService {
         File file = modelMapper.map(fileDTO, File.class);
         fileRepository.save(file);
     }
+    /*
+    public FileDTO findById(int fno){
+        Optional<File> optFile = fileRepository.findById(fno);
+
+        if(optFile.isPresent()){
+
+            File file = optFile.get();
+
+            FileDTO fileDTO = modelMapper.map(file, FileDTO.class);
+
+            return fileDTO;
+        }
+        return null;
+    }
+
+    public void updateDownloadCount(FileDTO fileDTO){
+        // 파일 다운로드 카운트 +1
+        int count = fileDTO.getDownload();
+        fileDTO.setDownload(count + 1);
+
+        File file = modelMapper.map(fileDTO, File.class);
+        fileRepository.save(file);
+    }
+     */
 
     @Value("${spring.servlet.multipart.location}")
     private String uploadDir;
@@ -97,8 +121,15 @@ public class FileService {
 
         File file = null;
 
-        if(optFile.isPresent()){
+        // 파일 다운 횟수 카운트
+        if (optFile.isPresent()) {
             file = optFile.get();
+
+            // 파일 다운로드 카운트 +1
+            int count = file.getDownload();
+            file.setDownload(count + 1);
+
+            fileRepository.save(file);
         }
 
         // 파일 다운로드 스트림 작업
@@ -129,4 +160,21 @@ public class FileService {
                 .status(HttpStatus.NOT_FOUND)
                 .build();
     }
+
+    /*
+    public void downloadFile(FileDTO fileDTO) throws IOException {
+
+        // 파일 패스 정보객체 생성
+        Path path = Paths.get(uploadDir + java.io.File.separator + fileDTO.getSName());
+
+        // 파일 컨텐츠 타입 확인
+        String contentType = Files.probeContentType(path);
+        fileDTO.setContentType(contentType);
+
+        // 파일 다운로드 스트림 작업으로 파일 자원 객체 생성
+        Resource resource = new InputStreamResource(Files.newInputStream(path));
+        fileDTO.setResource(resource);
+    }
+     */
+
 }

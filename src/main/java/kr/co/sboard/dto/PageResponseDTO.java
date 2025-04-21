@@ -24,6 +24,7 @@ public class PageResponseDTO {
 
     private String searchType;
     private String keyword;
+    private int CinforId;
 
     @Builder
     public PageResponseDTO(PageRequestDTO pageRequestDTO, List<ArticleDTO> dtoList, int total) {
